@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://unpkg.com/htmx.org@2.0.2" integrity="sha384-Y7hw+L/jvKeWIRRkqWYfPcvVxHzVzn5REgzbawhxAuQGwX1XWe70vji+VSeHOThJ" crossorigin="anonymous"></script>
+    <title>Title</title>
+</head>
+<body>
+<h1>Hello</h1>
+<form hx-post="/submit" hx-target="#graph" hx-swap="outerHTML">
+    <label for="text">
+        <input id="text" name="data" type="text">
+    </label>
+    <br>
+    <button type="submit">Add Node</button>
+</form>
+<div id="graph"></div>
+</body>
+</html>

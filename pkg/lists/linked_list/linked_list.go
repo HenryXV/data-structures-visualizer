@@ -1,5 +1,13 @@
 package linked_list
 
+import (
+	"bytes"
+	"fmt"
+	"github.com/goccy/go-graphviz"
+	"github.com/goccy/go-graphviz/cgraph"
+	"log"
+)
+
 type List struct {
 	dataFirst *node
 	dataLast  *node
@@ -166,6 +174,50 @@ func (l *List) Insert(index int, data interface{}) {
 	nodeAtIndex.prev.next = newNode
 	nodeAtIndex.prev = newNode
 
+}
+
+// Visualizer TODO: fix when nodes are the same, do not circle back to a preexisting node
+func (l *List) Visualizer() bytes.Buffer {
+	g := graphviz.New()
+	graph, err := g.Graph()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err := graph.Close(); err != nil {
+			log.Fatal(err)
+		}
+		g.Close()
+	}()
+
+	l.createNodesAndEdges(l.dataFirst, graph, nil)
+
+	var buf bytes.Buffer
+	if err := g.Render(graph, graphviz.PNG, &buf); err != nil {
+		log.Fatal(err)
+	}
+
+	return buf
+}
+
+func (l *List) createNodesAndEdges(node *node, graph *cgraph.Graph, prevGraphNode *cgraph.Node) {
+	if node == nil {
+		return
+	}
+
+	n, err := graph.CreateNode(fmt.Sprintf("%v", node.data))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if prevGraphNode != nil {
+		_, err = graph.CreateEdge("e", prevGraphNode, n)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	l.createNodesAndEdges(node.next, graph, n)
 }
 
 func (l *List) Size() int {
