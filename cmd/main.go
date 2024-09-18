@@ -10,17 +10,13 @@ import (
 	"os"
 )
 
-type Viz struct {
-	Image64 string
-}
-
 func main() {
-	var viz Viz
-
 	ll := linked_list.New()
+
 	tmpl := template.Must(template.ParseFiles("pkg/ui/index.html", "pkg/ui/image.html"))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		err := tmpl.Execute(w, viz)
+		ll.Clear()
+		err := tmpl.Execute(w, nil)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		}

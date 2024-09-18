@@ -176,7 +176,12 @@ func (l *List) Insert(index int, data interface{}) {
 
 }
 
-// Visualizer TODO: fix when nodes are the same, do not circle back to a preexisting node
+func (l *List) Clear() {
+	l.dataFirst = nil
+	l.dataLast = nil
+	l.size = 0
+}
+
 func (l *List) Visualizer() bytes.Buffer {
 	g := graphviz.New()
 	graph, err := g.Graph()
@@ -190,7 +195,7 @@ func (l *List) Visualizer() bytes.Buffer {
 		g.Close()
 	}()
 
-	l.createNodesAndEdges(l.dataFirst, graph, nil)
+	l.createNodesAndEdges(0, l.dataFirst, graph, nil)
 
 	var buf bytes.Buffer
 	if err := g.Render(graph, graphviz.PNG, &buf); err != nil {
@@ -200,24 +205,31 @@ func (l *List) Visualizer() bytes.Buffer {
 	return buf
 }
 
-func (l *List) createNodesAndEdges(node *node, graph *cgraph.Graph, prevGraphNode *cgraph.Node) {
+func (l *List) createNodesAndEdges(index int, node *node, graph *cgraph.Graph, prevGraphNode *cgraph.Node) {
 	if node == nil {
 		return
 	}
 
-	n, err := graph.CreateNode(fmt.Sprintf("%v", node.data))
+	n, err := graph.CreateNode(fmt.Sprintf("node_%d", index))
 	if err != nil {
 		log.Fatal(err)
 	}
+	n.SetLabel(fmt.Sprintf("%v", node.data))
+	n.SetShape("box")
 
 	if prevGraphNode != nil {
-		_, err = graph.CreateEdge("e", prevGraphNode, n)
+		_, err = graph.CreateEdge("next", prevGraphNode, n)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		_, err = graph.CreateEdge("prev", n, prevGraphNode)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	l.createNodesAndEdges(node.next, graph, n)
+	l.createNodesAndEdges(index+1, node.next, graph, n)
 }
 
 func (l *List) Size() int {
